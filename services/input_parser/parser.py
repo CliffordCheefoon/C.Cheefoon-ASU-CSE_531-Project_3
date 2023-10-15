@@ -18,7 +18,6 @@ class event:
         self.interface = interface
         self.money = money
 
-
 class customer_input:
     id : int
     events: list[event]
@@ -26,8 +25,6 @@ class customer_input:
     def __init__(self, id:int , events: list[event]):
         self.id = id
         self.events = events
-
-
 
 class branch_input:
     id : int
