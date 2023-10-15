@@ -1,43 +1,37 @@
-
-
 import decimal
 import logging
 from enum import Enum
 
 class customer_input_interface_enum(Enum):
+    """Enum of customer event types"""
     DEPOSIT = 1
     WITHDRAW = 2
     QUERY = 3
 
 class event:
-    id : int
-    interface : customer_input_interface_enum
-    money : decimal
+    """Data Structure representing an event of a customer"""
     def __init__(self, id: int, interface: customer_input_interface_enum, money: decimal = None):
-        self.id = id
-        self.interface = interface
-        self.money = money
+        self.id : int = id
+        self.interface : customer_input_interface_enum = interface
+        self.money : decimal = money
 
 class customer_input:
-    id : int
-    events: list[event]
+    """Data Structure representing a Customer in the input file"""
 
     def __init__(self, id:int , events: list[event]):
-        self.id = id
-        self.events = events
+        self.id: int = id
+        self.events: list[event] = events
 
 class branch_input:
-    id : int
-    balance: decimal
-
-
+    """Data Structure representing a Branch in the input file"""
     def __init__(self, id:int , balance: decimal):
-        self.id = id
-        self.balance = balance
+        self.id: int = id
+        self.balance: decimal = balance
 
 
 
 def get_branches(input_obj, logger : logging.Logger) -> list[branch_input]:
+    """Converts generic python object of the input file into a list of Branch Data Structures"""
     input_branches : list[branch_input]  = []
 
     for obj in input_obj:
@@ -49,6 +43,7 @@ def get_branches(input_obj, logger : logging.Logger) -> list[branch_input]:
 
 
 def get_customers(input_obj, logger : logging.Logger) -> list[customer_input]:
+    """Converts generic python object of the input file into a list of Customer Data Structures"""
     input_customers : list[customer_input]  = []
 
     for obj in input_obj:
@@ -65,7 +60,7 @@ def get_customers(input_obj, logger : logging.Logger) -> list[customer_input]:
                 elif event_input["interface"] == "deposit":
                     event_interface = customer_input_interface_enum.DEPOSIT
                 else:
-                    raise ValueError(f"""An unexpected customer event interface was encountered: {event["interface"]}""")
+                    raise ValueError(f"""An unexpected customer event interface was encountered: {event_input["interface"]}""")
 
                 logger.debug(f"""found customer event-> customer_id:{obj["id"]}, event_id:{event_input["id"]}, event_interface: {event_input["interface"]}, event_money: {event_input.get("money")} """)
                 events.append(event(event_input["id"],event_interface, event_input.get("money")))

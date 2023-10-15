@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+enum event_type_enum{
+
+    DEPOSIT = 0;
+    WITHDRAW = 1;
+    query = 2;
+}
+
+message branchEventRequest{
+    int32  id = 1;
+    event_type_enum event_type = 2;
+    double money = 3;
+
+}
+
+message branchEventResponse{
+    int32 id = 1;
+    event_type_enum event_type = 2;
+    double money = 3;
+    double balance = 4;
+}
+
+service branchEventSender{
+     rpc MsgDelivery (branchEventRequest) returns (branchEventResponse) {}
+}

@@ -1,0 +1,2 @@
+#run against root directory of this project
+python -m grpc_tools.protoc -I .protos --python_out="services/gprc_coms/" --pyi_out="services/gprc_coms/"  --grpc_python_out="services/gprc_coms/"  branch.proto
