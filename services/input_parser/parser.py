@@ -24,6 +24,7 @@ class customer_input:
 
 class branch_input:
     """Data Structure representing a Branch in the input file"""
+    port: int = None
     def __init__(self, id:int , balance: decimal):
         self.id: int = id
         self.balance: decimal = balance

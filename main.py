@@ -12,12 +12,13 @@ def main(input_file_dir : str):
     branches_inputs = get_branches(input, logging.getLogger())
     customer_inputs = get_customers(input, logging.getLogger())
     branch_server_spawn_manager_instance = branch_server_spawn_manager()
+    branch_server_spawn_manager_instance.assign_ports(branches_inputs, PORT_OFFSET)
     for branches_input in branches_inputs:
-        branch_server_spawn_manager_instance.spawn_server(PORT_OFFSET, branches_input, BRANCH_SERVER_LOG_DIR )
+        branch_server_spawn_manager_instance.spawn_server( branches_input, branches_inputs, BRANCH_SERVER_LOG_DIR )
 
 
-    
-    branch_server_spawn_manager_instance.terminate_all()
+
+    #branch_server_spawn_manager_instance.terminate_servers()
 
 
 
