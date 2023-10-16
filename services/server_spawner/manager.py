@@ -8,7 +8,8 @@ from multiprocessing import Process
 import grpc
 
 
-def serve(PORT_OFFSET : int , branch_data:  branch_input, server_log_dir :str):
+def serve_branch(PORT_OFFSET : int , branch_data:  branch_input, server_log_dir :str):
+    """Creates a grpc server, instantiating and wiring up the Branch Class has the handler """
     port = str(PORT_OFFSET + branch_data.id)
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     branch_pb2_grpc.add_branchEventSenderServicer_to_server(Branch(branch_data.id, branch_data.balance, None, server_log_dir, port ), server)
@@ -17,7 +18,8 @@ def serve(PORT_OFFSET : int , branch_data:  branch_input, server_log_dir :str):
     server.wait_for_termination()
 
 
-class server_spawn_manager():
+class branch_server_spawn_manager():
+    """A wrapper for managing branch server processes"""
 
     def  __init__(self):
         self.server_processes: list[Process] = []
@@ -25,7 +27,7 @@ class server_spawn_manager():
 
 
     def spawn_server(self, PORT_OFFSET : int , branch_data:  branch_input, server_log_dir :str):
-        p = Process(target=serve, args=(PORT_OFFSET, branch_data,server_log_dir))
+        p = Process(target=serve_branch, args=(PORT_OFFSET, branch_data,server_log_dir))
         p.start()
         self.server_processes.append(p)
         

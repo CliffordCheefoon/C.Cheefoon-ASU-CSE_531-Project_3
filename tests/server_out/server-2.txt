@@ -1,2 +1,0 @@
-19:52:49.494 root DEBUG Branch server ID:2 started on port: 50002
-19:52:49.494 root DEBUG Starting balance: $400
