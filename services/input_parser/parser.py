@@ -10,7 +10,10 @@ class customer_input_interface_enum(Enum):
 
 class event:
     """Data Structure representing an event of a customer"""
-    def __init__(self, id_incoming: int, interface: customer_input_interface_enum, money: decimal = None):
+    def __init__(self,
+                id_incoming: int,
+                interface: customer_input_interface_enum,
+                money: decimal = None):
         self.id : int = id_incoming
         self.interface : customer_input_interface_enum = interface
         self.money : decimal = money

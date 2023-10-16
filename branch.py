@@ -8,7 +8,8 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
     """Handler Class for the grpc server"""
 
     def __init__(
-            self, branch_data:branch_input, 
+            self,
+            branch_data:branch_input,
             branches_inputs: list[branch_input],
             server_log_dir: str):
         # unique ID of the Branch
