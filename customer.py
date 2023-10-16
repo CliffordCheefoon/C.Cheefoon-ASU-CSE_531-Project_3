@@ -1,7 +1,4 @@
-import grpc
-import example_pb2
-import example_pb2_grpc
-import time
+
 
 class Customer:
     def __init__(self, id, events):

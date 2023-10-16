@@ -10,23 +10,23 @@ class customer_input_interface_enum(Enum):
 
 class event:
     """Data Structure representing an event of a customer"""
-    def __init__(self, id: int, interface: customer_input_interface_enum, money: decimal = None):
-        self.id : int = id
+    def __init__(self, id_incoming: int, interface: customer_input_interface_enum, money: decimal = None):
+        self.id : int = id_incoming
         self.interface : customer_input_interface_enum = interface
         self.money : decimal = money
 
 class customer_input:
     """Data Structure representing a Customer in the input file"""
 
-    def __init__(self, id:int , events: list[event]):
-        self.id: int = id
+    def __init__(self, id_incoming:int , events: list[event]):
+        self.id: int = id_incoming
         self.events: list[event] = events
 
 class branch_input:
     """Data Structure representing a Branch in the input file"""
     port: int = None
-    def __init__(self, id:int , balance: decimal):
-        self.id: int = id
+    def __init__(self, id_incoming:int , balance: decimal):
+        self.id: int = id_incoming
         self.balance: decimal = balance
 
 
@@ -61,9 +61,13 @@ def get_customers(input_obj, logger : logging.Logger) -> list[customer_input]:
                 elif event_input["interface"] == "deposit":
                     event_interface = customer_input_interface_enum.DEPOSIT
                 else:
-                    raise ValueError(f"""An unexpected customer event interface was encountered: {event_input["interface"]}""")
+                    raise ValueError(
+                        f"""An unexpected customer event interface 
+                        was encountered: {event_input["interface"]}""")
 
-                logger.debug(f"""found customer event-> customer_id:{obj["id"]}, event_id:{event_input["id"]}, event_interface: {event_input["interface"]}, event_money: {event_input.get("money")} """)
+                logger.debug(f"""found customer event-> customer_id:{obj["id"]}, 
+                             event_id:{event_input["id"]}, event_interface: {event_input["interface"]},
+                             event_money: {event_input.get("money")} """)
                 events.append(event(event_input["id"],event_interface, event_input.get("money")))
 
             input_customers.append(customer_input(obj["id"], events))
