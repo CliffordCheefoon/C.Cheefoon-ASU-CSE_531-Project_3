@@ -6,7 +6,6 @@ from services.gprc_coms import branch_pb2_grpc
 from services.input_parser.parser import branch_input
 
 
-
 def serve_branch(
         branch_data:  branch_input,
         branches_inputs: list[branch_input],
@@ -21,7 +20,7 @@ def serve_branch(
     server.start()
     server.wait_for_termination()
 
-class branch_server_spawn_manager():
+class branch_server_spawn_manager(): # pylint: disable=invalid-name
     """A wrapper for managing branch server processes"""
     def __init__(self):
         self.server_processes: list[Process] = []
@@ -38,10 +37,12 @@ class branch_server_spawn_manager():
             branch_data:  branch_input,
             branches_inputs: list[branch_input],
             server_log_dir :str):
+        """spawns the branch server in the process referenced in the process list"""
         p = Process(target=serve_branch, args=( branch_data, branches_inputs,server_log_dir))
         p.start()
         self.server_processes.append(p)
 
     def terminate_servers(self):
+        """terminate all the branch server processes in the process list"""
         for process in self.server_processes:
             process.terminate()
