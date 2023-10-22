@@ -63,5 +63,5 @@ class branchEventSender(object):
         return grpc.experimental.unary_unary(request, target, '/branchEventSender/MsgDelivery',
             branch_pb2.branchEventRequest.SerializeToString, # pylint: disable=no-member
             branch_pb2.branchEventResponse.FromString, # pylint: disable=no-member
-            options, channel_credentials, 
+            options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -10,29 +10,33 @@ class event_type_enum(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = []
     DEPOSIT: _ClassVar[event_type_enum]
     WITHDRAW: _ClassVar[event_type_enum]
-    query: _ClassVar[event_type_enum]
+    QUERY: _ClassVar[event_type_enum]
 DEPOSIT: event_type_enum
 WITHDRAW: event_type_enum
-query: event_type_enum
+QUERY: event_type_enum
 
 class branchEventRequest(_message.Message):
-    __slots__ = ["id", "event_type", "money"]
-    ID_FIELD_NUMBER: _ClassVar[int]
+    __slots__ = ["event_id", "customer_id", "event_type", "money"]
+    EVENT_ID_FIELD_NUMBER: _ClassVar[int]
+    CUSTOMER_ID_FIELD_NUMBER: _ClassVar[int]
     EVENT_TYPE_FIELD_NUMBER: _ClassVar[int]
     MONEY_FIELD_NUMBER: _ClassVar[int]
-    id: int
+    event_id: int
+    customer_id: int
     event_type: event_type_enum
     money: float
-    def __init__(self, id: _Optional[int] = ..., event_type: _Optional[_Union[event_type_enum, str]] = ..., money: _Optional[float] = ...) -> None: ...
+    def __init__(self, event_id: _Optional[int] = ..., customer_id: _Optional[int] = ..., event_type: _Optional[_Union[event_type_enum, str]] = ..., money: _Optional[float] = ...) -> None: ...
 
 class branchEventResponse(_message.Message):
-    __slots__ = ["id", "event_type", "money", "balance"]
-    ID_FIELD_NUMBER: _ClassVar[int]
+    __slots__ = ["event_id", "event_type", "money", "balance", "is_success"]
+    EVENT_ID_FIELD_NUMBER: _ClassVar[int]
     EVENT_TYPE_FIELD_NUMBER: _ClassVar[int]
     MONEY_FIELD_NUMBER: _ClassVar[int]
     BALANCE_FIELD_NUMBER: _ClassVar[int]
-    id: int
+    IS_SUCCESS_FIELD_NUMBER: _ClassVar[int]
+    event_id: int
     event_type: event_type_enum
     money: float
     balance: float
-    def __init__(self, id: _Optional[int] = ..., event_type: _Optional[_Union[event_type_enum, str]] = ..., money: _Optional[float] = ..., balance: _Optional[float] = ...) -> None: ...
+    is_success: bool
+    def __init__(self, event_id: _Optional[int] = ..., event_type: _Optional[_Union[event_type_enum, str]] = ..., money: _Optional[float] = ..., balance: _Optional[float] = ..., is_success: bool = ...) -> None: ...
