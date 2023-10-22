@@ -32,12 +32,12 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         # replica of the Branch's balance
         self.balance = branch_data.balance
         # the list of process IDs of the branches
-        #self.branches = branches
+        self.branch_cluster_info : list[branch_input]  = branches_inputs
         # the list of Client stubs to communicate with the branches
         # a list of received messages used for debugging purpose
         self.recv_msg = list()
         # iterate the processID of the branches
-        self.branch_cluster_info : list[branch_input]  = branches_inputs
+        
 
         # TODO: students are expected to store the processID of the branches
         server_log_dir = server_log_dir + f"/server-branch-id-{self.id}.txt"

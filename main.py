@@ -8,7 +8,7 @@ import os
 import glob
 import jsonpickle
 
-
+#config 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 PORT_OFFSET : int = 50000
@@ -18,7 +18,10 @@ BRANCH_SERVER_LOG_DIR :str = """tests/server_out/"""
 
 
 def main(input_file_dir : str):
-
+    #Create directories for output files
+    os.makedirs(os.path.dirname(TEST_OUTPUT_FILE), exist_ok=True)
+    os.makedirs(os.path.dirname(BRANCH_SERVER_LOG_DIR), exist_ok=True)
+    
     #Clear previous run branch server logs
     files = glob.glob(f'{BRANCH_SERVER_LOG_DIR}*')
     for f in files:
