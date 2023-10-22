@@ -134,13 +134,16 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
             event: branch_pb2.event_type_enum,  # pylint:disable=invalid-name,no-member
             money: float) -> bool:
         """Propogate Withdraw operation to peer branch servers"""
+        broadcast_futures: list = []
         for branch in self.stub_list:
-            branch.branch_stub.MsgDelivery(
+            broadcast_futures.append(branch.branch_stub.MsgDelivery.future(
                 request = branchEventRequest(
                     customer_id=customer_id,
                     event_id=event_id,
                     event_type= event,
-                    money= money))
+                    money= money)))
+        for future in broadcast_futures:
+            future.result()
 
     def Propogate_Deposit( # pylint:disable=invalid-name
             self,
@@ -149,13 +152,16 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
             event: branch_pb2.event_type_enum,  # pylint:disable=invalid-name,no-member
             money: float) -> bool:
         """Propogate Deposit operation to peer branch servers"""
+        broadcast_futures: list = []
         for branch in self.stub_list: # pylint:disable=not-an-iterable
-            branch.branch_stub.MsgDelivery(
+            broadcast_futures.append(branch.branch_stub.MsgDelivery.future(
                 request = branchEventRequest(
                     customer_id=customer_id,
                     event_id=event_id,
                     event_type= event,
-                    money= money))
+                    money= money)))
+        for future in broadcast_futures:
+            future.result()
 
     def withdraw_op_check(self, money: float) -> bool:
         """Check if an withdraw operation is valid """
