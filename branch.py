@@ -61,6 +61,7 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
             ) -> list[branch_client_stub]:
         "Creates peer branch stubs"
         branch_clients: list[branch_client_stub] = []
+
         self.logger.debug(f"{len(branches_inputs)} nodes in network (including self)") # pylint: disable=logging-fstring-interpolation
         for branch_metadata in branches_inputs:
             if branch_metadata.id != self.id:
@@ -75,23 +76,43 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         self.logger.debug(f"""Recieved Event: customer_id = {request.customer_id} ||event_id = {request.event_id} || event_type = {branch_pb2.event_type_enum.Name((request.event_type)) } || money = {request.money}""")  # pylint: disable=logging-fstring-interpolation,no-member
 
         if request.event_type == branch_pb2.event_type_enum.QUERY: # pylint:disable=no-member
-            self.Query()
+            balance = self.Query()
+            return branchEventResponse(
+                event_id=request.event_id,
+                event_type="QUERY",
+                money = 0.00,
+                balance=balance,
+                is_success=True)
+
         elif request.event_type == branch_pb2.event_type_enum.DEPOSIT: # pylint:disable=no-member
-            self.Deposit(
+            balance, success = self.Deposit(
                 request.customer_id,
                 request.event_id,
                 request.event_type,
                 request.money)
+
+            return branchEventResponse(
+                event_id=request.event_id,
+                event_type="DEPOSIT",
+                money =request.money,
+                balance=balance,
+                is_success=success)
         elif request.event_type == branch_pb2.event_type_enum.WITHDRAW: # pylint:disable=no-member
-            self.Withdraw(
+            balance, success = self.Withdraw(
                 request.customer_id,
                 request.event_id,
                 request.event_type,
                 request.money)
+
+            return branchEventResponse(
+                event_id=request.event_id,
+                event_type="WITHDRAW",
+                money = request.money,
+                balance=balance,
+                is_success=success)
+
         else:
             raise ValueError("Unexpected Event encountered")
-        
-        return branchEventResponse(event_id= 0, event_type="QUERY", money = 0.00, balance= 0.00, is_success=True)
 
     def Query(self) -> float: # pylint:disable=invalid-name
         """"Getter for balance"""
@@ -110,8 +131,9 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
             self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")  # pylint: disable=logging-fstring-interpolation
             if self.id == customer_id:
                 self.Propogate_Withdraw(customer_id,event_id,event,money)
+            return self.balance, True
         else:
-            return 0.00, False
+            return self.balance, False
 
     def Deposit( # pylint:disable=invalid-name
             self,
@@ -125,6 +147,7 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")  # pylint: disable=logging-fstring-interpolation
         if self.id == customer_id:
             self.Propogate_Deposit(customer_id,event_id,event,money)
+        return self.balance, True
 
 
     def Propogate_Withdraw( # pylint:disable=invalid-name

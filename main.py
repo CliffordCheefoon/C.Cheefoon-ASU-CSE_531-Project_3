@@ -1,19 +1,29 @@
 import json
 import logging
 import time
-from customer import Customer
+from customer import Customer, customer_response
 from services.input_parser.parser import get_branches, get_customers
 from services.server_spawner.manager import branch_server_spawn_manager
+import os
+import glob
+import jsonpickle
 
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 PORT_OFFSET : int = 50000
-TEST_INPUT : str = """tests/test_case.json"""
+TEST_INPUT_FILE : str = """tests/test_case_50.json"""
+TEST_OUTPUT_FILE: str = """tests/output/output.json"""
 BRANCH_SERVER_LOG_DIR :str = """tests/server_out/"""
 
 
 def main(input_file_dir : str):
+
+    #Clear previous run branch server logs
+    files = glob.glob(f'{BRANCH_SERVER_LOG_DIR}*')
+    for f in files:
+        os.remove(f)
+
     input_json = json.load( open(input_file_dir, 'r', encoding="UTF8"))
     branches_inputs = get_branches(input_json, logging.getLogger())
     customer_inputs = get_customers(input_json, logging.getLogger())
@@ -30,14 +40,20 @@ def main(input_file_dir : str):
     for branch in branches_inputs:
         Customers.append(Customer(branch.id, branch))
 
-    for customer_input in customer_inputs:
-        for customer in Customers:
-            if customer_input.id == customer.id:
-                customer.executeEvents(customer_input.events)
+    with open(TEST_OUTPUT_FILE, "w", encoding="UTF8") as outfile:
+        for customer_input in customer_inputs:
+            for customer in Customers:
+                if customer_input.id == customer.id:
+                    customer.soft_reset()
+                    customer.executeEvents(customer_input.events)
+                    customer_output: customer_response = customer.get_customer_log()
+                    outfile.write(jsonpickle.encode(customer_output,  unpicklable=False) + "\n")
+
+                    break
 
 
-    #branch_server_spawn_manager_instance.terminate_servers()
+    branch_server_spawn_manager_instance.terminate_servers()
 
 
 if __name__ == "__main__":
-    main(TEST_INPUT)
+    main(TEST_INPUT_FILE)
