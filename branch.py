@@ -3,12 +3,12 @@ import logging
 import grpc
 from services.gprc_coms import branch_pb2_grpc
 from services.gprc_coms import branch_pb2
-from services.gprc_coms.branch_pb2 import branchEventRequest, branchEventResponse  # pylint: disable=no-name-in-module
+from services.gprc_coms.branch_pb2 import branchEventRequest, branchEventResponse           # pylint: disable=no-name-in-module
 from services.input_parser.parser import branch_input
 
 
 
-class branch_client_stub: # pylint: disable=invalid-name
+class branch_client_stub:                                                                   # pylint: disable=invalid-name
     """Wrapper for branch metadata and stub pointer"""
     branch_metadata : branch_input
     branch_stub: branch_pb2_grpc.branchEventSenderStub
@@ -37,7 +37,7 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         # a list of received messages used for debugging purpose
         self.recv_msg = list()
         # iterate the processID of the branches
-        
+
 
         # TODO: students are expected to store the processID of the branches
         server_log_dir = server_log_dir + f"/server-branch-id-{self.id}.txt"
@@ -49,8 +49,8 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
-        self.logger.debug(f"Branch server ID:{self.id} started on port: {branch_data.port}")  # pylint: disable=logging-fstring-interpolation
-        self.logger.debug(f"Starting balance: {self.balance}")         # pylint: disable=logging-fstring-interpolation
+        self.logger.debug(f"Branch server ID:{self.id} started on port: {branch_data.port}")    # pylint: disable=logging-fstring-interpolation
+        self.logger.debug(f"Starting balance: {self.balance}")                                  # pylint: disable=logging-fstring-interpolation
 
         self.stub_list:list[branch_client_stub] = self.register_peer_stubs(branches_inputs)
 
@@ -62,20 +62,20 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         "Creates peer branch stubs"
         branch_clients: list[branch_client_stub] = []
 
-        self.logger.debug(f"{len(branches_inputs)} nodes in network (including self)") # pylint: disable=logging-fstring-interpolation
+        self.logger.debug(f"{len(branches_inputs)} nodes in network (including self)")          # pylint: disable=logging-fstring-interpolation
         for branch_metadata in branches_inputs:
             if branch_metadata.id != self.id:
                 channel = grpc.insecure_channel(f'localhost:{branch_metadata.port}')
                 stub = branch_pb2_grpc.branchEventSenderStub(channel)
                 branch_clients.append(branch_client_stub(branch_metadata, stub))
-        self.logger.debug(f"{len(branch_clients)} peer stubs registered") # pylint: disable=logging-fstring-interpolation
+        self.logger.debug(f"{len(branch_clients)} peer stubs registered")                       # pylint: disable=logging-fstring-interpolation
         return branch_clients
 
     # TODO: students are expected to process requests from both Client and Branch
     def MsgDelivery(self,request, context):
         self.logger.debug(f"""Recieved Event: customer_id = {request.customer_id} ||event_id = {request.event_id} || event_type = {branch_pb2.event_type_enum.Name((request.event_type)) } || money = {request.money}""")  # pylint: disable=logging-fstring-interpolation,no-member
 
-        if request.event_type == branch_pb2.event_type_enum.QUERY: # pylint:disable=no-member
+        if request.event_type == branch_pb2.event_type_enum.QUERY:                              # pylint:disable=no-member
             balance = self.Query()
             return branchEventResponse(
                 event_id=request.event_id,
@@ -84,7 +84,7 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
                 balance=balance,
                 is_success=True)
 
-        elif request.event_type == branch_pb2.event_type_enum.DEPOSIT: # pylint:disable=no-member
+        elif request.event_type == branch_pb2.event_type_enum.DEPOSIT:                          # pylint:disable=no-member
             balance, success = self.Deposit(
                 request.customer_id,
                 request.event_id,
@@ -97,7 +97,7 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
                 money =request.money,
                 balance=balance,
                 is_success=success)
-        elif request.event_type == branch_pb2.event_type_enum.WITHDRAW: # pylint:disable=no-member
+        elif request.event_type == branch_pb2.event_type_enum.WITHDRAW:                         # pylint:disable=no-member
             balance, success = self.Withdraw(
                 request.customer_id,
                 request.event_id,
@@ -114,47 +114,47 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         else:
             raise ValueError("Unexpected Event encountered")
 
-    def Query(self) -> float: # pylint:disable=invalid-name
+    def Query(self) -> float:                                                                   # pylint:disable=invalid-name
         """"Getter for balance"""
         return self.balance
 
-    def Withdraw( # pylint:disable=invalid-name
+    def Withdraw(                                                                               # pylint:disable=invalid-name
             self,
             customer_id: int,
             event_id:int,
-            event: branch_pb2.event_type_enum,  # pylint:disable=invalid-name,no-member
+            event: branch_pb2.event_type_enum,                                                  # pylint:disable=invalid-name,no-member
             money: float
             ) -> [float,bool]:
         """Decrease balance"""
         if self.withdraw_op_check(money):
             self.balance =  self.balance - money
-            self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")  # pylint: disable=logging-fstring-interpolation
+            self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")     # pylint: disable=logging-fstring-interpolation
             if self.id == customer_id:
                 self.Propogate_Withdraw(customer_id,event_id,event,money)
             return self.balance, True
         else:
             return self.balance, False
 
-    def Deposit( # pylint:disable=invalid-name
+    def Deposit(                                                                                # pylint:disable=invalid-name
             self,
             customer_id: int,
             event_id:int,
-            event: branch_pb2.event_type_enum,  # pylint:disable=invalid-name,no-member
+            event: branch_pb2.event_type_enum,                                                  # pylint:disable=invalid-name,no-member
             money: float
             ) -> [float,bool]:
         """increase balance"""
         self.balance =  self.balance + money
-        self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")  # pylint: disable=logging-fstring-interpolation
+        self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")         # pylint: disable=logging-fstring-interpolation
         if self.id == customer_id:
             self.Propogate_Deposit(customer_id,event_id,event,money)
         return self.balance, True
 
 
-    def Propogate_Withdraw( # pylint:disable=invalid-name
+    def Propogate_Withdraw(                                                                     # pylint:disable=invalid-name
             self,
             customer_id: int,
             event_id:int,
-            event: branch_pb2.event_type_enum,  # pylint:disable=invalid-name,no-member
+            event: branch_pb2.event_type_enum,                                                  # pylint:disable=invalid-name,no-member
             money: float) -> bool:
         """Propogate Withdraw operation to peer branch servers"""
         broadcast_futures: list = []
@@ -168,11 +168,11 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         for future in broadcast_futures:
             future.result()
 
-    def Propogate_Deposit( # pylint:disable=invalid-name
+    def Propogate_Deposit(                                                                      # pylint:disable=invalid-name
             self,
             customer_id: int,
             event_id:int,
-            event: branch_pb2.event_type_enum,  # pylint:disable=invalid-name,no-member
+            event: branch_pb2.event_type_enum,                                                  # pylint:disable=invalid-name,no-member
             money: float) -> bool:
         """Propogate Deposit operation to peer branch servers"""
         broadcast_futures: list = []

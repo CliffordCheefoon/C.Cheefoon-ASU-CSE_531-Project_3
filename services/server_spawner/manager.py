@@ -20,7 +20,7 @@ def serve_branch(
     server.start()
     server.wait_for_termination()
 
-class branch_server_spawn_manager(): # pylint: disable=invalid-name
+class branch_server_spawn_manager():                                                    # pylint: disable=invalid-name
     """A wrapper for managing branch server processes"""
     def __init__(self):
         self.server_processes: list[Process] = []

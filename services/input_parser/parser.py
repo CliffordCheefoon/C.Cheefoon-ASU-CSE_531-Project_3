@@ -2,13 +2,13 @@ import decimal
 import logging
 from enum import Enum
 
-class customer_input_interface_enum(Enum): # pylint: disable=invalid-name
+class customer_input_interface_enum(Enum):                                          # pylint: disable=invalid-name
     """Enum of customer event types"""
     DEPOSIT = 1
     WITHDRAW = 2
     QUERY = 3
 
-class event: # pylint: disable=invalid-name
+class event:                                                                        # pylint: disable=invalid-name
     """Data Structure representing an event of a customer"""
     def __init__(self,
                 id_incoming: int,
@@ -18,14 +18,14 @@ class event: # pylint: disable=invalid-name
         self.interface : customer_input_interface_enum = interface
         self.money : decimal = money
 
-class customer_input: # pylint: disable=invalid-name
+class customer_input:                                                               # pylint: disable=invalid-name
     """Data Structure representing a Customer in the input file"""
 
     def __init__(self, id_incoming:int , events: list[event]):
         self.id: int = id_incoming
         self.events: list[event] = events
 
-class branch_input: # pylint: disable=invalid-name
+class branch_input:                                                                 # pylint: disable=invalid-name
     """Data Structure representing a Branch in the input file"""
     port: int = None
     def __init__(self, id_incoming:int , balance: decimal):
