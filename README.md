@@ -23,7 +23,7 @@ Using Remote Procedure Call’s communication protocol (more specifically gRPC),
 
  - (Optional) In the main.py file, there is a configuration variable “TEST_INPUT_FILE”. You can modify this to specify which test case you would like to run. Options include:
    - “tests/test_case_50.json” (50 Branch test case)(default)
-   - “tests/test_case_50.json” (100 branch test case)
+   - “tests/test_case_100.json” (100 branch test case)
    - “tests/sample_input.json” (Project example test case)
 
  - Run the program using the command: ```python ./main.py```
