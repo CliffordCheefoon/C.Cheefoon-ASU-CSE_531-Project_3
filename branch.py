@@ -33,13 +33,11 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         self.balance = branch_data.balance
         # the list of process IDs of the branches
         self.branch_cluster_info : list[branch_input]  = branches_inputs
-        # the list of Client stubs to communicate with the branches
         # a list of received messages used for debugging purpose
         self.recv_msg = list()
         # iterate the processID of the branches
 
-
-        # TODO: students are expected to store the processID of the branches
+        #Setup server logger to file
         server_log_dir = server_log_dir + f"/server-branch-id-{self.id}.txt"
         self.logger = logging.getLogger()
         handler =logging.FileHandler(server_log_dir, mode='w')
@@ -52,6 +50,7 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         self.logger.debug(f"Branch server ID:{self.id} started on port: {branch_data.port}")    # pylint: disable=logging-fstring-interpolation
         self.logger.debug(f"Starting balance: {self.balance}")                                  # pylint: disable=logging-fstring-interpolation
 
+        # the list of Client stubs to communicate with the branches
         self.stub_list:list[branch_client_stub] = self.register_peer_stubs(branches_inputs)
 
 
@@ -71,8 +70,10 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         self.logger.debug(f"{len(branch_clients)} peer stubs registered")                       # pylint: disable=logging-fstring-interpolation
         return branch_clients
 
-    # TODO: students are expected to process requests from both Client and Branch
+
+
     def MsgDelivery(self,request, context):
+        "The message handler"
         self.logger.debug(f"""Recieved Event: customer_id = {request.customer_id} ||event_id = {request.event_id} || event_type = {branch_pb2.event_type_enum.Name((request.event_type)) } || money = {request.money}""")  # pylint: disable=logging-fstring-interpolation,no-member
 
         if request.event_type == branch_pb2.event_type_enum.QUERY:                              # pylint:disable=no-member
@@ -130,6 +131,8 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
             self.balance =  self.balance - money
             self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")     # pylint: disable=logging-fstring-interpolation
             if self.id == customer_id:
+                #If the customer_id and the branch_id are the same, then this is the customer's 
+                # local branch, we need to propogate the change to other branches
                 self.Propogate_Withdraw(customer_id,event_id,event,money)
             return self.balance, True
         else:
@@ -146,6 +149,8 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         self.balance =  self.balance + money
         self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")         # pylint: disable=logging-fstring-interpolation
         if self.id == customer_id:
+                #If the customer_id and the branch_id are the same, then this is the customer's 
+                # local branch, we need to propogate the change to other branches
             self.Propogate_Deposit(customer_id,event_id,event,money)
         return self.balance, True
 

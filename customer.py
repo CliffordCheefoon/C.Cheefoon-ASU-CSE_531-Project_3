@@ -6,22 +6,23 @@ from services.gprc_coms.branch_pb2 import branchEventRequest, branchEventRespons
 from services.input_parser.parser import branch_input, event
 
 
-class event_response:                                                                           # pylint: disable=invalid-name
-    """Data Representation Class: Customer events"""
+class event_mutate_response:                                                                           # pylint: disable=invalid-name
+    """Data Representation Class: Customer events that mutate the balance"""
     def __init__(self, interface: str, result ):
         self.interface = interface
         self.result = result
 
+class event_query_response:                                                                           # pylint: disable=invalid-name
+    """Data Representation Class: Customer Query"""
+    def __init__(self, interface: str, result ):
+        self.interface = interface
+        self.balance = result
+
 class customer_response:                                                                        # pylint: disable=invalid-name
     """Data Representation Class: Customer with events"""
-    def __init__(self, incoming_id : int , recv : list[event_response]):
+    def __init__(self, incoming_id : int , recv : list):
         self.id = incoming_id
         self.recv = recv
-
-class event_query_obj:                                                                          # pylint: disable=invalid-name
-    """Data Representation Class: event"""
-    def __init__(self, balance: float):
-        self.balance = balance
 
 class Customer:
     """A customer with it's own GRPC stub to it's own Branch Server"""
@@ -30,7 +31,7 @@ class Customer:
         # unique ID of the Customer
         self.id = id
         # a list of received messages used for debugging purpose
-        self.recvMsg: list[event_response] = []                                                 # pylint: disable=invalid-name
+        self.recvMsg: list = []                                                 # pylint: disable=invalid-name
         # pointer for the stub
         self.stub = self.createStub(branch_metadata)
 
@@ -60,7 +61,7 @@ class Customer:
                     money= incoming_event.money))
 
             if response.event_type ==  branch_pb2.event_type_enum.QUERY:                        # pylint:disable=no-member
-                self.recvMsg.append(event_response("query", event_query_obj(response.balance)))
+                self.recvMsg.append(event_query_response("query", response.balance))
 
             elif response.event_type ==  branch_pb2.event_type_enum.DEPOSIT:                    # pylint:disable=no-member
                 success_str : str
@@ -69,7 +70,7 @@ class Customer:
                 else:
                     success_str = "failed"
 
-                self.recvMsg.append(event_response("deposit", success_str))
+                self.recvMsg.append(event_mutate_response("deposit", success_str))
 
             elif response.event_type ==  branch_pb2.event_type_enum.WITHDRAW:                   # pylint:disable=no-member
                 success_str : str
@@ -78,7 +79,7 @@ class Customer:
                 else:
                     success_str = "failed"
 
-                self.recvMsg.append(event_response("withdraw", success_str))
+                self.recvMsg.append(event_mutate_response("withdraw", success_str))
             else:
                 raise ValueError("Encountered an unexpected event_type")
 
