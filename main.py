@@ -12,10 +12,16 @@ import jsonpickle
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 PORT_OFFSET : int = 50000
-TEST_INPUT_FILE : str = """tests/test_case_50.json"""
+TEST_INPUT_FILE : str = """tests/sample_input.json"""
 TEST_OUTPUT_FILE: str = """tests/output/output.json"""
 BRANCH_SERVER_LOG_DIR :str = """tests/server_out/"""
 ################################################################
+
+
+class final_output:
+    def __init__(self, incoming_id, balance):
+        self.id:int = incoming_id
+        self.balance = balance
 
 def main(input_file_dir : str):
     #Create directories for output files
@@ -40,19 +46,25 @@ def main(input_file_dir : str):
 
     Customers : list[Customer] = []
 
-    for branch in branches_inputs:
-        Customers.append(Customer(branch.id, branch))
+    for customer in customer_inputs:
+        Customers.append(Customer(customer.id, branches_inputs))
 
     with open(TEST_OUTPUT_FILE, "w", encoding="UTF8") as outfile:
+        customer_output : list = []
         for customer_input in customer_inputs:
             for customer in Customers:
                 if customer_input.id == customer.id:
                     customer.soft_reset()
                     customer.executeEvents(customer_input.events)
-                    customer_output: customer_response = customer.get_customer_log()
-                    outfile.write(jsonpickle.encode(customer_output,  unpicklable=False) + "\n")
-
+                    customer_output.append(customer.get_customer_log())
                     break
+
+
+        final_output_list: list[final_output] = []
+        for output in customer_output:  
+            final_output_list.append(final_output(output.id, output.recv[0].balance))
+
+        outfile.write(jsonpickle.encode(final_output_list,  unpicklable=False) + "\n")
 
 
     branch_server_spawn_manager_instance.terminate_servers()

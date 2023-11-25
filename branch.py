@@ -36,7 +36,7 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         # a list of received messages used for debugging purpose
         self.recv_msg = list()
         # iterate the processID of the branches
-
+        self.write_id = 0
         #Setup server logger to file
         server_log_dir = server_log_dir + f"/server-branch-id-{self.id}.txt"
         self.logger = logging.getLogger()
@@ -83,7 +83,8 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
                 event_type="QUERY",
                 money = 0.00,
                 balance=balance,
-                is_success=True)
+                is_success=True,
+                write_id=self.write_id)
 
         elif request.event_type == branch_pb2.event_type_enum.DEPOSIT:                          # pylint:disable=no-member
             balance, success = self.Deposit(
@@ -97,7 +98,8 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
                 event_type="DEPOSIT",
                 money =request.money,
                 balance=balance,
-                is_success=success)
+                is_success=success,
+                write_id=self.write_id)
         elif request.event_type == branch_pb2.event_type_enum.WITHDRAW:                         # pylint:disable=no-member
             balance, success = self.Withdraw(
                 request.customer_id,
@@ -110,7 +112,8 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
                 event_type="WITHDRAW",
                 money = request.money,
                 balance=balance,
-                is_success=success)
+                is_success=success,
+                write_id=self.write_id)
 
         else:
             raise ValueError("Unexpected Event encountered")
@@ -130,6 +133,7 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         if self.withdraw_op_check(money):
             self.balance =  self.balance - money
             self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")     # pylint: disable=logging-fstring-interpolation
+            self.write_id = self.write_id + 1
             if self.id == customer_id:
                 #If the customer_id and the branch_id are the same, then this is the customer's 
                 # local branch, we need to propogate the change to other branches
@@ -148,8 +152,9 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
         """increase balance"""
         self.balance =  self.balance + money
         self.logger.debug(f"""event_id: {event_id} change balance to {self.balance}""")         # pylint: disable=logging-fstring-interpolation
+        self.write_id = self.write_id + 1
         if self.id == customer_id:
-                #If the customer_id and the branch_id are the same, then this is the customer's 
+                #If the customer_id and the branch_id are the same, then this is the customer's
                 # local branch, we need to propogate the change to other branches
             self.Propogate_Deposit(customer_id,event_id,event,money)
         return self.balance, True
@@ -169,7 +174,8 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
                     customer_id=customer_id,
                     event_id=event_id,
                     event_type= event,
-                    money= money)))
+                    money= money,
+                    is_propogate=True)))
         for future in broadcast_futures:
             future.result()
 
@@ -187,7 +193,8 @@ class Branch(branch_pb2_grpc.branchEventSenderServicer):
                     customer_id=customer_id,
                     event_id=event_id,
                     event_type= event,
-                    money= money)))
+                    money= money,
+                    is_propogate=True)))
         for future in broadcast_futures:
             future.result()
 

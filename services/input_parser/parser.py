@@ -13,10 +13,15 @@ class event:                                                                    
     def __init__(self,
                 id_incoming: int,
                 interface: customer_input_interface_enum,
+                dest: int,
                 money: decimal = None):
         self.id : int = id_incoming
         self.interface : customer_input_interface_enum = interface
-        self.money : decimal = money
+        if money is None:
+            self.money : decimal = 0
+        else:
+            self.money : decimal = money
+        self.dest:int = dest
 
 class customer_input:                                                               # pylint: disable=invalid-name
     """Data Structure representing a Customer in the input file"""
@@ -71,7 +76,7 @@ def get_customers(input_obj, logger : logging.Logger) -> list[customer_input]:
                 logger.debug(f"""found customer event-> customer_id:{obj["id"]}, 
                              event_id:{event_input["id"]}, event_interface: {event_input["interface"]},
                              event_money: {event_input.get("money")} """)
-                events.append(event(event_input["id"],event_interface, event_input.get("money")))
+                events.append(event(event_input["id"],event_interface,event_input["dest"]  , event_input.get("money")))
 
             input_customers.append(customer_input(obj["id"], events))
     return input_customers

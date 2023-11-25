@@ -27,24 +27,34 @@ class customer_response:                                                        
 class Customer:
     """A customer with it's own GRPC stub to it's own Branch Server"""
     events: list[event]
-    def __init__(self, id: int, branch_metadata : branch_input):                                # pylint: disable=redefined-builtin
+    def __init__(self, id: int, branch_metadata_list : list[branch_input]):     # pylint: disable=redefined-builtin
         # unique ID of the Customer
         self.id = id
         # a list of received messages used for debugging purpose
         self.recvMsg: list = []                                                 # pylint: disable=invalid-name
         # pointer for the stub
-        self.stub = self.createStub(branch_metadata)
+        self.stub_list = self.createStubs(branch_metadata_list)
+        self.last_write_id  = 0
 
     def soft_reset(self):
         """removes previous recv_msg without removing local branch stub, 
         use for cases were a Customer has more than one set of events to perform."""
         self.recvMsg = list()
 
-    def createStub(self, branch_metadata : branch_input) -> branch_client_stub:                 # pylint: disable=invalid-name
+    def createStubs(self, branch_metadata_list : list[branch_input]) -> list[branch_client_stub]:                 # pylint: disable=invalid-name
         """Creates an object with the branch metadata and stub pointer"""
-        channel = grpc.insecure_channel(f'localhost:{branch_metadata.port}')
-        stub = branch_pb2_grpc.branchEventSenderStub(channel)
-        return branch_client_stub(branch_metadata, stub)
+        return_list: list[branch_client_stub] = []
+        for branch_metadata in branch_metadata_list:
+            channel = grpc.insecure_channel(f'localhost:{branch_metadata.port}')
+            stub = branch_pb2_grpc.branchEventSenderStub(channel)
+            return_list.append(branch_client_stub(branch_metadata, stub))
+        return return_list
+
+    def find_stub(self, dest_id:int) -> branch_client_stub:
+        """Finds the correct stub based on incoming dest id"""
+        for stub in self.stub_list:
+            if stub.branch_metadata.id == dest_id:
+                return stub
 
 
     def executeEvents(self,events: list[event]):                                                # pylint: disable=invalid-name
@@ -53,12 +63,17 @@ class Customer:
 
 
         for incoming_event in events:
-            response: branchEventResponse = self.stub.branch_stub.MsgDelivery(
-                request = branchEventRequest(
-                    customer_id=self.id,
-                    event_id=incoming_event.id,
-                    event_type= incoming_event.interface.name,
-                    money= incoming_event.money))
+            while True:
+                response: branchEventResponse = self.find_stub(incoming_event.dest).branch_stub.MsgDelivery(
+                    request = branchEventRequest(
+                        customer_id=self.id,
+                        event_id=incoming_event.id,
+                        event_type= incoming_event.interface.name,
+                        money= incoming_event.money,
+                        is_propogate=False))
+                if response.write_id >= self.last_write_id:
+                    self.last_write_id = response.write_id
+                    break
 
             if response.event_type ==  branch_pb2.event_type_enum.QUERY:                        # pylint:disable=no-member
                 self.recvMsg.append(event_query_response("query", response.balance))
@@ -85,4 +100,9 @@ class Customer:
 
     def get_customer_log(self) -> customer_response:
         "create a custom response object for output"
-        return customer_response(self.id, self.recvMsg)
+        return_list = []
+        for eventMessage in self.recvMsg:
+            if eventMessage.interface == "query":
+                return_list.append(eventMessage)
+                
+        return customer_response(self.id, return_list)
