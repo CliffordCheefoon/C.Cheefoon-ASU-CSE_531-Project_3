@@ -12,13 +12,14 @@ import jsonpickle
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 PORT_OFFSET : int = 50000
-TEST_INPUT_FILE : str = """tests/sample_input.json"""
+TEST_INPUT_FILE : str = """tests/monotonic_writes.json"""
 TEST_OUTPUT_FILE: str = """tests/output/output.json"""
 BRANCH_SERVER_LOG_DIR :str = """tests/server_out/"""
 ################################################################
 
 
 class final_output:
+    """Project 3 specific output fomat"""
     def __init__(self, incoming_id, balance):
         self.id:int = incoming_id
         self.balance = balance
@@ -61,7 +62,7 @@ def main(input_file_dir : str):
 
 
         final_output_list: list[final_output] = []
-        for output in customer_output:  
+        for output in customer_output:
             final_output_list.append(final_output(output.id, output.recv[0].balance))
 
         outfile.write(jsonpickle.encode(final_output_list,  unpicklable=False) + "\n")

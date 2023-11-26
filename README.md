@@ -1,12 +1,11 @@
 # C.Cheefoon-ASU-CSE_531-Project_3
 
-# TODO: Write this (This is project 1 README copy)
 
 ## Problem Statement
-In the given scenario, N number of Customers and N number of bank Branches; Customer X submits requests (Deposit, Withdraw or Query) to Branch X. The major: it is required that all other Branches be aware of the requests made to keep the balance of all the Branches consistent.
+In the given scenario, N number of Customers and N number of bank Branches; Customer X can submit requests (Deposit, Withdraw or Query) to any branch. It is required that all other Branches be aware of the requests made to keep the balance of all the Branches consistent. In this scenario, the Customer can make requests to any branch making maintaining consistency between branches required. 
 
 ## Goal
-Using Remote Procedure Call’s communication protocol (more specifically gRPC), design and implement a Distributed System in Python. This system should accommodate any number of Customers with any number of events, and any number of Branches while maintaining replication transparency. That is: each Branch’s balance should remain consistent with all other Branches as events occur anywhere in the Branch network.
+Using Remote Procedure Call’s communication protocol (more specifically gRPC), design and implement a Distributed System in Python. This system should allow Customers to send requests to any branch of the branch network while remaining consistent. To remain consistent, this project will use the Monotonic Writes and Read Your Writes consistency models. 
 
 ## Cool Achievements
  - Wrote the ```server_spawner``` module that handles the creation, port assignment, management, and termination of gPRC server processes.
@@ -15,7 +14,7 @@ Using Remote Procedure Call’s communication protocol (more specifically gRPC),
 
 ## Setup Process
 
- - Pull the project using git from: https://github.com/CliffordCheefoon/C.Cheefoon-ASU-CSE_531-Project_1.git
+ - Pull the project using git from: https://github.com/CliffordCheefoon/C.Cheefoon-ASU-CSE_531-Project_3.git
 
  - (Optional) Create a Python virtual environment, and set your terminal to use this environment. Create a venv: ```python3 -m venv .venv```
 
@@ -24,9 +23,8 @@ Using Remote Procedure Call’s communication protocol (more specifically gRPC),
 ```pip install -r .\requirements.txt”```
 
  - (Optional) In the main.py file, there is a configuration variable “TEST_INPUT_FILE”. You can modify this to specify which test case you would like to run. Options include:
-   - “tests/test_case_50.json” (50 Branch test case)(default)
-   - “tests/test_case_100.json” (100 branch test case)
-   - “tests/sample_input.json” (Project example test case)
+   - “tests/monotonic_writes.json” (default)
+   - “tests/read_your_writes.json” 
 
  - Run the program using the command: ```python ./main.py```
 
